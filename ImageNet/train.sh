@@ -14,4 +14,4 @@ python3 -m torch.distributed.launch --nproc_per_node=4 imagenet_amp.py \
     -b 64 -j 24 -p 100 \
     --teacher resnet34 \
     --review-kd-loss-weight 1.0 \
-    /research/dept8/fyp21/lj2104/datasets/ImageNet \
+    /research/dept8/fyp21/lj2104/datasets/ImageNet

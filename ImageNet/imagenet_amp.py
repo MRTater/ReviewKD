@@ -9,6 +9,7 @@ import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.distributed as dist
 import torch.optim
+import torch.multiprocessing as mp
 import torch.utils.data
 import torch.utils.data.distributed
 import torchvision.transforms as transforms
@@ -21,13 +22,13 @@ from torch.nn import functional as F
 
 import numpy as np
 
-try:
-    from apex.parallel import DistributedDataParallel as DDP
-    from apex.fp16_utils import *
-    from apex import amp, optimizers
-    from apex.multi_tensor_apply import multi_tensor_applier
-except ImportError:
-    raise ImportError("Please install apex from https://www.github.com/nvidia/apex to run this example.")
+# try:
+#     from apex.parallel import DistributedDataParallel as DDP
+#     from apex.fp16_utils import *
+#     from apex import amp, optimizers
+#     from apex.multi_tensor_apply import multi_tensor_applier
+# except ImportError:
+#     raise ImportError("Please install apex from https://www.github.com/nvidia/apex to run this example.")
 
 model_names = sorted(name for name in models.__dict__
                      if name.islower() and not name.startswith("__")
@@ -90,6 +91,18 @@ parser.add_argument('--teacher-weight', type=str, default='torchvision',
 parser.add_argument('--review-kd-loss-weight', type=float, default=1.0,
                     help='feature konwledge distillation loss weight')
 
+parser.add_argument(
+    "--world-size", default=-1, type=int, help="number of nodes for distributed training",
+)
+parser.add_argument("--rank", default=-1, type=int, help="node rank for distributed training")
+parser.add_argument(
+    "--dist-url",
+    default="tcp://224.66.41.62:23456",
+    type=str,
+    help="url used to set up distributed training",
+)
+parser.add_argument("--dist-backend", default="nccl", type=str, help="distributed backend")
+
 
 cudnn.benchmark = True
 
@@ -131,23 +144,61 @@ print("\nCUDNN VERSION: {}\n".format(torch.backends.cudnn.version()))
 def main():
     global best_prec1, args
 
-    args.distributed = False
-    if 'WORLD_SIZE' in os.environ:
-        args.distributed = int(os.environ['WORLD_SIZE']) > 1
-        os.environ['MASTER_ADDR'] = '127.0.0.1'
-        os.environ['MASTER_PORT'] = '9901'
+    # args.distributed = False
+    # if 'WORLD_SIZE' in os.environ:
+    #     args.distributed = int(os.environ['WORLD_SIZE']) > 1
+    #     os.environ['MASTER_ADDR'] = '127.0.0.1'
+    #     os.environ['MASTER_PORT'] = '9901'
+    #
+    # args.gpu = 0
+    # args.world_size = 1
+    #
+    # if args.distributed:
+    #     args.gpu = args.local_rank
+    #     torch.cuda.set_device(args.gpu)
+    #     torch.distributed.init_process_group(backend='nccl',
+    #                                          init_method='env://')
+    #     args.world_size = torch.distributed.get_world_size()
+    #
+    # assert torch.backends.cudnn.enabled, "Amp requires cudnn backend to be enabled."
 
-    args.gpu = 0
-    args.world_size = 1
+    if args.dist_url == "env://" and args.world_size == -1:
+        args.world_size = int(os.environ["WORLD_SIZE"])
+
+    args.distributed = args.world_size > 1 or args.multiprocessing_distributed
+
+    ngpus_per_node = torch.cuda.device_count()
+    if args.multiprocessing_distributed:
+        # Since we have ngpus_per_node processes per node, the total world_size
+        # needs to be adjusted accordingly
+        args.world_size = ngpus_per_node * args.world_size
+        # Use torch.multiprocessing.spawn to launch distributed processes: the
+        # main_worker process function
+        mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, args))
+    else:
+        # Simply call main_worker function
+        main_worker(args.gpu, ngpus_per_node, args)
+
+def main_worker(gpu, ngpus_per_node, args):
+    global best_acc1
+    args.gpu = gpu
+
+    if args.gpu is not None:
+        print("Use GPU: {} for training".format(args.gpu))
 
     if args.distributed:
-        args.gpu = args.local_rank
-        torch.cuda.set_device(args.gpu)
-        torch.distributed.init_process_group(backend='nccl',
-                                             init_method='env://')
-        args.world_size = torch.distributed.get_world_size()
-
-    assert torch.backends.cudnn.enabled, "Amp requires cudnn backend to be enabled."
+        if args.dist_url == "env://" and args.rank == -1:
+            args.rank = int(os.environ["RANK"])
+        if args.multiprocessing_distributed:
+            # For multiprocessing distributed training, rank needs to be the
+            # global rank among all the processes
+            args.rank = args.rank * ngpus_per_node + gpu
+        dist.init_process_group(
+            backend=args.dist_backend,
+            init_method=args.dist_url,
+            world_size=args.world_size,
+            rank=args.rank,
+        )
 
     # create model
     if args.pretrained:
@@ -160,14 +211,12 @@ def main():
         else:
             model = models.__dict__[args.arch]()
 
-    if args.sync_bn:
-        import apex
-        print("using apex synced BN")
-        model = apex.parallel.convert_syncbn_model(model)
-                                                                        
-
-    model = model.cuda()
-    print(model)
+    # if args.sync_bn:
+    #     import apex
+    #     print("using apex synced BN")
+    #     model = apex.parallel.convert_syncbn_model(model)
+    # model = model.cuda()
+    # print(model)
 
     # Scale learning rate based on global batch size
     args.lr = args.lr*float(args.batch_size*args.world_size)/256. 
@@ -183,24 +232,50 @@ def main():
     elif args.lr_adjust_type == 'exp':
         scheduler = ExponentialLR(optimizer, args.gamma)
 
-    # Initialize Amp.  Amp accepts either values or strings for the optional override arguments,
-    # for convenient interoperation with argparse.
-    model, optimizer = amp.initialize(model, optimizer,
-                                      opt_level=args.opt_level,
-                                      keep_batchnorm_fp32=args.keep_batchnorm_fp32,
-                                      loss_scale=args.loss_scale
-                                      )
-
-    # For distributed training, wrap the model with apex.parallel.DistributedDataParallel.
-    # This must be done AFTER the call to amp.initialize.  If model = DDP(model) is called
-    # before model, ... = amp.initialize(model, ...), the call to amp.initialize may alter
-    # the types of model's parameters in a way that disrupts or destroys DDP's allreduce hooks.
-    if args.distributed:
-        # By default, apex.parallel.DistributedDataParallel overlaps communication with 
-        # computation in the backward pass.
-        # model = DDP(model)
-        # delay_allreduce delays all communication to the end of the backward pass.
-        model = DDP(model, delay_allreduce=True)
+    # # Initialize Amp.  Amp accepts either values or strings for the optional override arguments,
+    # # for convenient interoperation with argparse.
+    # model, optimizer = amp.initialize(model, optimizer,
+    #                                   opt_level=args.opt_level,
+    #                                   keep_batchnorm_fp32=args.keep_batchnorm_fp32,
+    #                                   loss_scale=args.loss_scale
+    #                                   )
+    #
+    # # For distributed training, wrap the model with apex.parallel.DistributedDataParallel.
+    # # This must be done AFTER the call to amp.initialize.  If model = DDP(model) is called
+    # # before model, ... = amp.initialize(model, ...), the call to amp.initialize may alter
+    # # the types of model's parameters in a way that disrupts or destroys DDP's allreduce hooks.
+    # if args.distributed:
+    #     # By default, apex.parallel.DistributedDataParallel overlaps communication with
+    #     # computation in the backward pass.
+    #     # model = DDP(model)
+    #     # delay_allreduce delays all communication to the end of the backward pass.
+    #     model = DDP(model, delay_allreduce=True)
+    if not torch.cuda.is_available():
+        print("using CPU, this will be slow")
+    elif args.distributed:
+        # For multiprocessing distributed, DistributedDataParallel constructor
+        # should always set the single device scope, otherwise,
+        # DistributedDataParallel will use all available devices.
+        if args.gpu is not None:
+            torch.cuda.set_device(args.gpu)
+            model.cuda(args.gpu)
+            # When using a single GPU per process and per
+            # DistributedDataParallel, we need to divide the batch size
+            # ourselves based on the total number of GPUs we have
+            args.batch_size = int(args.batch_size / ngpus_per_node)
+            args.workers = int((args.workers + ngpus_per_node - 1) / ngpus_per_node)
+            model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
+        else:
+            model.cuda()
+            # DistributedDataParallel will divide and allocate batch_size to all
+            # available GPUs if device_ids are not set
+            model = torch.nn.parallel.DistributedDataParallel(model)
+    elif args.gpu is not None:
+        torch.cuda.set_device(args.gpu)
+        model = model.cuda(args.gpu)
+    else:
+        # DataParallel will divide and allocate batch_size to all available GPUs
+        model = torch.nn.DataParallel(model).cuda()
 
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda()
