@@ -228,7 +228,7 @@ def main_worker(gpu, ngpus_per_node, args):
     # print(model)
 
     # Scale learning rate based on global batch size
-    args.lr = args.lr*float(args.batch_size*args.world_size)/256. 
+    args.lr = args.lr*float(args.batch_size*4)/256.
     print('learning rate: ', args.lr)
     param = model.parameters()
     optimizer = torch.optim.SGD(param, args.lr,
