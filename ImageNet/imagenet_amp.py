@@ -2,6 +2,7 @@ import argparse
 import os
 import shutil
 import time
+import warnings
 
 import torch
 import torch.nn as nn
@@ -142,6 +143,7 @@ print("loss_scale = {}".format(args.loss_scale), type(args.loss_scale))
 
 print("\nCUDNN VERSION: {}\n".format(torch.backends.cudnn.version()))
 
+best_acc1 = 0
 
 def main():
     global best_prec1, args
@@ -174,6 +176,7 @@ def main():
     args.distributed = args.world_size > 1 or args.multiprocessing_distributed
 
     ngpus_per_node = torch.cuda.device_count()
+    print("ngpus_per_node %d" % ngpus_per_node)
     if args.multiprocessing_distributed:
         # Since we have ngpus_per_node processes per node, the total world_size
         # needs to be adjusted accordingly
@@ -226,7 +229,7 @@ def main_worker(gpu, ngpus_per_node, args):
     # print(model)
 
     # Scale learning rate based on global batch size
-    args.lr = args.lr * float(args.batch_size * 4) / 256.
+    args.lr = args.lr * float(args.batch_size * 1) / 256.
     print('learning rate: ', args.lr)
     param = model.parameters()
     optimizer = torch.optim.SGD(param, args.lr,
@@ -500,11 +503,11 @@ def train(train_loader, model, teacher, criterion, optimizer, epoch, scheduler):
                 reduced_cls_loss = loss_cls.data
 
             # to_python_float incurs a host<->device sync
-            losses.update(to_python_float(reduced_loss), input.size(0))
-            reviewkd_losses.update(to_python_float(reduced_reviewkd_loss), input.size(0))
-            cls_losses.update(to_python_float(reduced_cls_loss), input.size(0))
-            top1.update(to_python_float(prec1), input.size(0))
-            top5.update(to_python_float(prec5), input.size(0))
+            losses.update(reduced_loss.item(), input.size(0))
+            reviewkd_losses.update((reduced_reviewkd_loss.item()), input.size(0))
+            cls_losses.update((reduced_cls_loss.item()), input.size(0))
+            top1.update((prec1.item()), input.size(0))
+            top5.update((prec5.item()), input.size(0))
 
             torch.cuda.synchronize()
             batch_time.update((time.time() - end) / args.print_freq)
@@ -568,8 +571,8 @@ def validate(val_loader, model, teacher, criterion):
             prec1 = reduce_tensor(prec1)
             prec5 = reduce_tensor(prec5)
 
-        top1.update(to_python_float(prec1), input.size(0))
-        top5.update(to_python_float(prec5), input.size(0))
+        top1.update(prec1.item(), input.size(0))
+        top5.update(prec5.item(), input.size(0))
 
         # measure elapsed time
         batch_time.update(time.time() - end)
