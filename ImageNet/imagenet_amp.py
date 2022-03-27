@@ -71,6 +71,25 @@ parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
 parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                     help='use pre-trained model')
 parser.add_argument('--save_dir', type=str, default='')
+parser.add_argument(
+    "--world-size", default=-1, type=int, help="number of nodes for distributed training",
+)
+parser.add_argument("--rank", default=-1, type=int, help="node rank for distributed training")
+parser.add_argument(
+    "--dist-url",
+    default="tcp://224.66.41.62:23456",
+    type=str,
+    help="url used to set up distributed training",
+)
+parser.add_argument("--dist-backend", default="nccl", type=str, help="distributed backend")
+parser.add_argument(
+    "--multiprocessing-distributed",
+    action="store_true",
+    help="Use multi-processing distributed training to launch "
+    "N processes per node, which has N GPUs. This is the "
+    "fastest way to use PyTorch for either single node or "
+    "multi node data parallel training",
+)
 
 parser.add_argument('--prof', default=-1, type=int,
                     help='Only run 10 iterations for profiling.')
@@ -91,17 +110,7 @@ parser.add_argument('--teacher-weight', type=str, default='torchvision',
 parser.add_argument('--review-kd-loss-weight', type=float, default=1.0,
                     help='feature konwledge distillation loss weight')
 
-parser.add_argument(
-    "--world-size", default=-1, type=int, help="number of nodes for distributed training",
-)
-parser.add_argument("--rank", default=-1, type=int, help="node rank for distributed training")
-parser.add_argument(
-    "--dist-url",
-    default="tcp://224.66.41.62:23456",
-    type=str,
-    help="url used to set up distributed training",
-)
-parser.add_argument("--dist-backend", default="nccl", type=str, help="distributed backend")
+
 
 
 cudnn.benchmark = True
