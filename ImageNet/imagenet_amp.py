@@ -82,6 +82,10 @@ parser.add_argument(
     help="url used to set up distributed training",
 )
 parser.add_argument("--dist-backend", default="nccl", type=str, help="distributed backend")
+parser.add_argument('--prof', default=-1, type=int,
+                    help='Only run 10 iterations for profiling.')
+parser.add_argument("--seed", default=5, type=int)
+parser.add_argument("--gpu", default=None, type=int, help="GPU id to use.")
 parser.add_argument(
     "--multiprocessing-distributed",
     action="store_true",
@@ -90,10 +94,6 @@ parser.add_argument(
     "fastest way to use PyTorch for either single node or "
     "multi node data parallel training",
 )
-
-parser.add_argument('--prof', default=-1, type=int,
-                    help='Only run 10 iterations for profiling.')
-parser.add_argument("--seed", default=5, type=int)
 
 parser.add_argument("--local_rank", default=0, type=int)
 parser.add_argument('--sync_bn', action='store_true',
