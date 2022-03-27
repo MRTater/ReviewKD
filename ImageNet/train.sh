@@ -9,7 +9,7 @@
 #SBATCH -p batch_72h
 
 source activate KD
-python3 imagenet_amp.py \
+python3 torch.distributed.launch imagenet_amp.py \
     -a resnet18 --save_dir output/r18-r34/ \
     -b 64 -j 4 -p 10 \
     --multiprocessing-distributed \
