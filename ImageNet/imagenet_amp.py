@@ -19,7 +19,6 @@ from models.reviewkd import build_review_kd, hcl
 from torch.optim.lr_scheduler import MultiStepLR, CosineAnnealingLR, ExponentialLR
 from torch.nn import functional as F
 
-
 import numpy as np
 
 # try:
@@ -38,10 +37,10 @@ parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('data', metavar='DIR',
                     help='path to dataset')
 parser.add_argument('--arch', '-a', metavar='ARCH', default='resnet18',
-#                    choices=model_names,
+                    #                    choices=model_names,
                     help='model architecture: ' +
-                    ' | '.join(model_names) +
-                    ' (default: resnet18)')
+                         ' | '.join(model_names) +
+                         ' (default: resnet18)')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
 parser.add_argument('--epochs', default=100, type=int, metavar='N',
@@ -51,8 +50,9 @@ parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
 parser.add_argument('-b', '--batch-size', default=64, type=int,
                     metavar='N', help='mini-batch size per process (default: 256)')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
-                    metavar='LR', help='Initial learning rate.  Will be scaled by <global batch size>/256: args.lr = args.lr*float(args.batch_size*args.world_size)/256.  A warmup schedule will also be applied over the first 5 epochs.')
-parser.add_argument('--lr_adjust_step', default=[30,60,90], type=int, nargs='+',
+                    metavar='LR',
+                    help='Initial learning rate.  Will be scaled by <global batch size>/256: args.lr = args.lr*float(args.batch_size*args.world_size)/256.  A warmup schedule will also be applied over the first 5 epochs.')
+parser.add_argument('--lr_adjust_step', default=[30, 60, 90], type=int, nargs='+',
                     help='initial learning rate')
 parser.add_argument('--lr_adjust_type', default='step', type=str,
                     help='lr adjust type')
@@ -90,9 +90,9 @@ parser.add_argument(
     "--multiprocessing-distributed",
     action="store_true",
     help="Use multi-processing distributed training to launch "
-    "N processes per node, which has N GPUs. This is the "
-    "fastest way to use PyTorch for either single node or "
-    "multi node data parallel training",
+         "N processes per node, which has N GPUs. This is the "
+         "fastest way to use PyTorch for either single node or "
+         "multi node data parallel training",
 )
 
 parser.add_argument("--local_rank", default=0, type=int)
@@ -110,25 +110,23 @@ parser.add_argument('--teacher-weight', type=str, default='torchvision',
 parser.add_argument('--review-kd-loss-weight', type=float, default=1.0,
                     help='feature konwledge distillation loss weight')
 
-
-
-
 cudnn.benchmark = True
+
 
 def fast_collate(batch):
     imgs = [img[0] for img in batch]
     targets = torch.tensor([target[1] for target in batch], dtype=torch.int64)
     w = imgs[0].size[0]
     h = imgs[0].size[1]
-    tensor = torch.zeros( (len(imgs), 3, h, w), dtype=torch.uint8 )
+    tensor = torch.zeros((len(imgs), 3, h, w), dtype=torch.uint8)
     for i, img in enumerate(imgs):
         nump_array = np.asarray(img, dtype=np.uint8)
-        if(nump_array.ndim < 3):
+        if (nump_array.ndim < 3):
             nump_array = np.expand_dims(nump_array, axis=-1)
         nump_array = np.rollaxis(nump_array, 2)
 
         tensor[i] += torch.from_numpy(nump_array)
-        
+
     return tensor, targets
 
 
@@ -150,6 +148,8 @@ print("keep_batchnorm_fp32 = {}".format(args.keep_batchnorm_fp32), type(args.kee
 print("loss_scale = {}".format(args.loss_scale), type(args.loss_scale))
 
 print("\nCUDNN VERSION: {}\n".format(torch.backends.cudnn.version()))
+
+
 def main():
     global best_prec1, args
 
@@ -187,6 +187,7 @@ def main():
     else:
         # Simply call main_worker function
         main_worker(args.gpu, ngpus_per_node, args)
+
 
 def main_worker(gpu, ngpus_per_node, args):
     global best_acc1
@@ -228,7 +229,7 @@ def main_worker(gpu, ngpus_per_node, args):
     # print(model)
 
     # Scale learning rate based on global batch size
-    args.lr = args.lr*float(args.batch_size*4)/256.
+    args.lr = args.lr * float(args.batch_size * 4) / 256.
     print('learning rate: ', args.lr)
     param = model.parameters()
     optimizer = torch.optim.SGD(param, args.lr,
@@ -295,7 +296,7 @@ def main_worker(gpu, ngpus_per_node, args):
         def resume():
             if os.path.isfile(args.resume):
                 print("=> loading checkpoint '{}'".format(args.resume))
-                checkpoint = torch.load(args.resume, map_location = lambda storage, loc: storage.cuda(args.gpu))
+                checkpoint = torch.load(args.resume, map_location=lambda storage, loc: storage.cuda(args.gpu))
                 args.start_epoch = checkpoint['epoch']
                 best_prec1 = checkpoint['best_prec1']
                 model.load_state_dict(checkpoint['state_dict'])
@@ -304,13 +305,14 @@ def main_worker(gpu, ngpus_per_node, args):
                       .format(args.resume, checkpoint['epoch']))
             else:
                 print("=> no checkpoint found at '{}'".format(args.resume))
+
         resume()
 
     # Data loading code
     traindir = os.path.join(args.data, 'train')
     valdir = os.path.join(args.data, 'val')
 
-    if(args.arch == "inception_v3"):
+    if (args.arch == "inception_v3"):
         raise RuntimeError("Currently, inception_v3 is not supported by this example.")
         # crop_size = 299
         # val_size = 320 # I chose this value arbitrarily, we can adjust.
@@ -319,18 +321,18 @@ def main_worker(gpu, ngpus_per_node, args):
         val_size = 256
 
     trans = transforms.Compose([
-            transforms.RandomResizedCrop(crop_size),
-            transforms.RandomHorizontalFlip(),
-            # transforms.ToTensor(), Too slow
-            # normalize,
-        ])
+        transforms.RandomResizedCrop(crop_size),
+        transforms.RandomHorizontalFlip(),
+        # transforms.ToTensor(), Too slow
+        # normalize,
+    ])
     train_dataset = datasets.ImageFolder(
         traindir, trans
     )
     val_dataset = datasets.ImageFolder(valdir, transforms.Compose([
-            transforms.Resize(val_size),
-            transforms.CenterCrop(crop_size),
-        ]))
+        transforms.Resize(val_size),
+        transforms.CenterCrop(crop_size),
+    ]))
 
     train_sampler = None
     val_sampler = None
@@ -357,12 +359,12 @@ def main_worker(gpu, ngpus_per_node, args):
             teacher = models.__dict__[args.teacher]()
             for param in teacher.parameters():
                 param.requires_grad = False
-            checkpoint = torch.load(args.teacher_weight, map_location = lambda storage, loc: storage.cuda(args.gpu))
+            checkpoint = torch.load(args.teacher_weight, map_location=lambda storage, loc: storage.cuda(args.gpu))
             teacher.load_state_dict(checkpoint)
         teacher = teacher.cuda()
     else:
         teacher = None
- 
+
     if args.evaluate:
         validate(val_loader, model, teacher, criterion)
         return
@@ -371,7 +373,6 @@ def main_worker(gpu, ngpus_per_node, args):
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             train_sampler.set_epoch(epoch)
-
 
         # train for one epoch
         train(train_loader, model, teacher, criterion, optimizer, epoch, scheduler)
@@ -385,23 +386,25 @@ def main_worker(gpu, ngpus_per_node, args):
             best_prec1 = max(prec1, best_prec1)
             print(epoch)
             print('Learning rate:', optimizer.param_groups[0]['lr'])
-            print('Total Time: '+ format_time(time.time()-st_time))
-            print('Remaining Time: '+ format_time((time.time()-st_time)/(epoch-args.start_epoch+1)*(args.epochs-epoch-1)))
-            print('Best Acc: '+ str(best_prec1))
+            print('Total Time: ' + format_time(time.time() - st_time))
+            print('Remaining Time: ' + format_time(
+                (time.time() - st_time) / (epoch - args.start_epoch + 1) * (args.epochs - epoch - 1)))
+            print('Best Acc: ' + str(best_prec1))
             save_checkpoint(args, {
                 'epoch': epoch + 1,
                 'arch': args.arch,
                 'state_dict': model.state_dict(),
                 'best_prec1': best_prec1,
-                'optimizer' : optimizer.state_dict(),
+                'optimizer': optimizer.state_dict(),
             }, is_best)
+
 
 class data_prefetcher():
     def __init__(self, loader):
         self.loader = iter(loader)
         self.stream = torch.cuda.Stream()
-        self.mean = torch.tensor([0.485 * 255, 0.456 * 255, 0.406 * 255]).cuda().view(1,3,1,1)
-        self.std = torch.tensor([0.229 * 255, 0.224 * 255, 0.225 * 255]).cuda().view(1,3,1,1)
+        self.mean = torch.tensor([0.485 * 255, 0.456 * 255, 0.406 * 255]).cuda().view(1, 3, 1, 1)
+        self.std = torch.tensor([0.229 * 255, 0.224 * 255, 0.225 * 255]).cuda().view(1, 3, 1, 1)
         self.preload()
 
     def preload(self):
@@ -416,7 +419,7 @@ class data_prefetcher():
             self.next_target = self.next_target.cuda(non_blocking=True)
             self.next_input = self.next_input.float()
             self.next_input = self.next_input.sub_(self.mean).div_(self.std)
-            
+
     def next(self):
         torch.cuda.current_stream().wait_stream(self.stream)
         input = self.next_input
@@ -454,7 +457,7 @@ def train(train_loader, model, teacher, criterion, optimizer, epoch, scheduler):
         if args.prof >= 0: torch.cuda.nvtx.range_push("Body of iteration {}".format(i))
 
         adjust_learning_rate(scheduler, optimizer, epoch, i, len(train_loader))
-        
+
         # compute output
         if args.prof >= 0: torch.cuda.nvtx.range_push("forward")
         output = model(input)
@@ -469,10 +472,11 @@ def train(train_loader, model, teacher, criterion, optimizer, epoch, scheduler):
         # compute gradient and do SGD step
         optimizer.zero_grad()
 
-        if args.prof >= 0: torch.cuda.nvtx.range_push("backward")
-        with amp.scale_loss(loss, optimizer) as scaled_loss:
-            scaled_loss.backward()
-        if args.prof >= 0: torch.cuda.nvtx.range_pop()
+        # if args.prof >= 0: torch.cuda.nvtx.range_push("backward")
+        # with amp.scale_loss(loss, optimizer) as scaled_loss:
+        #     scaled_loss.backward()
+        # if args.prof >= 0: torch.cuda.nvtx.range_pop()
+        loss.backward()
 
         # for param in model.parameters():
         #     print(param.data.double().sum().item(), param.grad.data.double().sum().item())
@@ -481,14 +485,14 @@ def train(train_loader, model, teacher, criterion, optimizer, epoch, scheduler):
         optimizer.step()
         if args.prof >= 0: torch.cuda.nvtx.range_pop()
 
-        if i%args.print_freq == 0:
+        if i % args.print_freq == 0:
             # Every print_freq iterations, check the loss, accuracy, and speed.
             # For best performance, it doesn't make sense to print these metrics every
             # iteration, since they incur an allreduce and some host<->device syncs.
 
             # Measure accuracy
             prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
-   
+
             # Average loss and accuracy across processes for logging 
             if args.distributed:
                 reduced_loss = reduce_tensor(loss.data)
@@ -500,16 +504,16 @@ def train(train_loader, model, teacher, criterion, optimizer, epoch, scheduler):
                 reduced_loss = loss.data
                 reduced_reviewkd_loss = loss_reviewkd.data
                 reduced_cls_loss = loss_cls.data
-   
+
             # to_python_float incurs a host<->device sync
             losses.update(to_python_float(reduced_loss), input.size(0))
             reviewkd_losses.update(to_python_float(reduced_reviewkd_loss), input.size(0))
             cls_losses.update(to_python_float(reduced_cls_loss), input.size(0))
             top1.update(to_python_float(prec1), input.size(0))
             top5.update(to_python_float(prec5), input.size(0))
-    
+
             torch.cuda.synchronize()
-            batch_time.update((time.time() - end)/args.print_freq)
+            batch_time.update((time.time() - end) / args.print_freq)
             end = time.time()
 
             if args.local_rank == 0:
@@ -521,12 +525,12 @@ def train(train_loader, model, teacher, criterion, optimizer, epoch, scheduler):
                       'ClsLoss {clsloss.val:.10f} ({clsloss.avg:.4f})\t'
                       'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
                       'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
-                       epoch, i, len(train_loader),
-                       args.world_size*args.batch_size/batch_time.val,
-                       args.world_size*args.batch_size/batch_time.avg,
-                       batch_time=batch_time,
-                       loss=losses, reviewkdloss = reviewkd_losses, clsloss = cls_losses,
-                       top1=top1, top5=top5))
+                    epoch, i, len(train_loader),
+                    args.world_size * args.batch_size / batch_time.val,
+                    args.world_size * args.batch_size / batch_time.avg,
+                    batch_time=batch_time,
+                    loss=losses, reviewkdloss=reviewkd_losses, clsloss=cls_losses,
+                    top1=top1, top5=top5))
 
         if args.prof >= 0: torch.cuda.nvtx.range_push("prefetcher.next()")
         input, target = prefetcher.next()
@@ -584,11 +588,11 @@ def validate(val_loader, model, teacher, criterion):
                   'Speed {2:.3f} ({3:.3f})\t'
                   'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
                   'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
-                   i, len(val_loader),
-                   args.world_size * args.batch_size / batch_time.val,
-                   args.world_size * args.batch_size / batch_time.avg,
-                   batch_time=batch_time,
-                   top1=top1, top5=top5))
+                i, len(val_loader),
+                args.world_size * args.batch_size / batch_time.val,
+                args.world_size * args.batch_size / batch_time.avg,
+                batch_time=batch_time,
+                top1=top1, top5=top5))
 
         input, target = prefetcher.next()
 
@@ -597,14 +601,17 @@ def validate(val_loader, model, teacher, criterion):
 
     return top1.avg
 
+
 def save_checkpoint(args, state, is_best, filename='checkpoint.pth.tar'):
     filename = os.path.join(args.save_dir, filename)
     torch.save(state, filename)
     if is_best:
         shutil.copyfile(filename, os.path.join(args.save_dir, 'model_best.pth.tar'))
 
+
 class AverageMeter(object):
     """Computes and stores the average and current value"""
+
     def __init__(self):
         self.reset()
 
@@ -620,24 +627,26 @@ class AverageMeter(object):
         self.count += n
         self.avg = self.sum / self.count
 
+
 def adjust_learning_rate(scheduler, optimizer, epoch, step, len_epoch):
     """LR schedule that should yield 76% converged accuracy with batch size 256"""
 
     """Warmup"""
-#    lr = args.lr
-#    if epoch < 5:
-#        lr = lr*float(1 + step + epoch*len_epoch)/(5.*len_epoch)
-#        for param_group in optimizer.param_groups:
-#            param_group['lr'] = lr
-#        return
+    #    lr = args.lr
+    #    if epoch < 5:
+    #        lr = lr*float(1 + step + epoch*len_epoch)/(5.*len_epoch)
+    #        for param_group in optimizer.param_groups:
+    #            param_group['lr'] = lr
+    #        return
     lr = args.lr
     for i in args.lr_adjust_step:
         if i <= epoch:
             lr *= 0.1
     for param_group in optimizer.param_groups:
-         param_group['lr'] = lr
-#    scheduler.step(epoch)
+        param_group['lr'] = lr
 
+
+#    scheduler.step(epoch)
 
 
 def accuracy(output, target, topk=(1,)):
@@ -662,16 +671,17 @@ def reduce_tensor(tensor):
     rt /= args.world_size
     return rt
 
+
 def format_time(seconds):
-    days = int(seconds / 3600/24)
-    seconds = seconds - days*3600*24
+    days = int(seconds / 3600 / 24)
+    seconds = seconds - days * 3600 * 24
     hours = int(seconds / 3600)
-    seconds = seconds - hours*3600
+    seconds = seconds - hours * 3600
     minutes = int(seconds / 60)
-    seconds = seconds - minutes*60
+    seconds = seconds - minutes * 60
     secondsf = int(seconds)
     seconds = seconds - secondsf
-    millis = int(seconds*1000)
+    millis = int(seconds * 1000)
 
     f = ''
     i = 1
