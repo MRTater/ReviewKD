@@ -74,7 +74,8 @@ parser.add_argument('--pretrained', dest='pretrained', action='store_true',
 parser.add_argument('--save_dir', type=str, default='')
 parser.add_argument("--world-size", default=-1, type=int, help="number of nodes for distributed training")
 parser.add_argument("--rank", default=-1, type=int, help="node rank for distributed training")
-parser.add_argument("--dist-url", default="tcp://224.66.41.62:23456", type=str, help="url used to set up distributed training")
+parser.add_argument("--dist-url", default="tcp://224.66.41.62:23456", type=str,
+                    help="url used to set up distributed training")
 parser.add_argument("--dist-backend", default="nccl", type=str, help="distributed backend")
 parser.add_argument('--prof', default=-1, type=int,
                     help='Only run 10 iterations for profiling.')
@@ -144,6 +145,7 @@ print("loss_scale = {}".format(args.loss_scale), type(args.loss_scale))
 print("\nCUDNN VERSION: {}\n".format(torch.backends.cudnn.version()))
 
 best_acc1 = 0
+
 
 def main():
     global best_prec1, args
@@ -242,24 +244,6 @@ def main_worker(gpu, ngpus_per_node, args):
     elif args.lr_adjust_type == 'exp':
         scheduler = ExponentialLR(optimizer, args.gamma)
 
-    # # Initialize Amp.  Amp accepts either values or strings for the optional override arguments,
-    # # for convenient interoperation with argparse.
-    # model, optimizer = amp.initialize(model, optimizer,
-    #                                   opt_level=args.opt_level,
-    #                                   keep_batchnorm_fp32=args.keep_batchnorm_fp32,
-    #                                   loss_scale=args.loss_scale
-    #                                   )
-    #
-    # # For distributed training, wrap the model with apex.parallel.DistributedDataParallel.
-    # # This must be done AFTER the call to amp.initialize.  If model = DDP(model) is called
-    # # before model, ... = amp.initialize(model, ...), the call to amp.initialize may alter
-    # # the types of model's parameters in a way that disrupts or destroys DDP's allreduce hooks.
-    # if args.distributed:
-    #     # By default, apex.parallel.DistributedDataParallel overlaps communication with
-    #     # computation in the backward pass.
-    #     # model = DDP(model)
-    #     # delay_allreduce delays all communication to the end of the backward pass.
-    #     model = DDP(model, delay_allreduce=True)
     if not torch.cuda.is_available():
         print("using CPU, this will be slow")
     elif args.distributed:
@@ -447,7 +431,7 @@ def train(train_loader, model, teacher, criterion, optimizer, epoch, scheduler):
     i = 0
     while input is not None:
         i += 1
-        if args.prof >= 0 and i == args.prof:
+        if 0 <= args.prof == i:
             print("Profiling begun at iteration {}".format(i))
             torch.cuda.cudart().cudaProfilerStart()
 
