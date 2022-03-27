@@ -71,16 +71,9 @@ parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
 parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                     help='use pre-trained model')
 parser.add_argument('--save_dir', type=str, default='')
-parser.add_argument(
-    "--world-size", default=-1, type=int, help="number of nodes for distributed training",
-)
+parser.add_argument("--world-size", default=-1, type=int, help="number of nodes for distributed training")
 parser.add_argument("--rank", default=-1, type=int, help="node rank for distributed training")
-parser.add_argument(
-    "--dist-url",
-    default="tcp://224.66.41.62:23456",
-    type=str,
-    help="url used to set up distributed training",
-)
+parser.add_argument("--dist-url", default="tcp://224.66.41.62:23456", type=str, help="url used to set up distributed training")
 parser.add_argument("--dist-backend", default="nccl", type=str, help="distributed backend")
 parser.add_argument('--prof', default=-1, type=int,
                     help='Only run 10 iterations for profiling.')
@@ -170,6 +163,10 @@ def main():
     #     args.world_size = torch.distributed.get_world_size()
     #
     # assert torch.backends.cudnn.enabled, "Amp requires cudnn backend to be enabled."
+
+    if args.gpu is not None:
+        warnings.warn('You have chosen a specific GPU. This will completely '
+                      'disable data parallelism.')
 
     if args.dist_url == "env://" and args.world_size == -1:
         args.world_size = int(os.environ["WORLD_SIZE"])
@@ -280,9 +277,6 @@ def main_worker(gpu, ngpus_per_node, args):
             # DistributedDataParallel will divide and allocate batch_size to all
             # available GPUs if device_ids are not set
             model = torch.nn.parallel.DistributedDataParallel(model)
-    elif args.gpu is not None:
-        torch.cuda.set_device(args.gpu)
-        model = model.cuda(args.gpu)
     else:
         # DataParallel will divide and allocate batch_size to all available GPUs
         model = torch.nn.DataParallel(model).cuda()
