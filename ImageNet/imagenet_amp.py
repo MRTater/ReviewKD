@@ -44,7 +44,7 @@ parser.add_argument('--arch', '-a', metavar='ARCH', default='resnet18',
                          ' (default: resnet18)')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
-parser.add_argument('--epochs', default=100, type=int, metavar='N',
+parser.add_argument('--epochs', default=20, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
@@ -264,6 +264,9 @@ def main_worker(gpu, ngpus_per_node, args):
             # DistributedDataParallel will divide and allocate batch_size to all
             # available GPUs if device_ids are not set
             model = torch.nn.parallel.DistributedDataParallel(model)
+    elif args.gpu is not None:
+        torch.cuda.set_device(args.gpu)
+        model = model.cuda(args.gpu)
     else:
         # DataParallel will divide and allocate batch_size to all available GPUs
         model = torch.nn.DataParallel(model).cuda()
@@ -462,9 +465,9 @@ def train(train_loader, model, teacher, criterion, optimizer, epoch, scheduler):
         # for param in model.parameters():
         #     print(param.data.double().sum().item(), param.grad.data.double().sum().item())
 
-        if args.prof >= 0: torch.cuda.nvtx.range_push("optimizer.step()")
+        # if args.prof >= 0: torch.cuda.nvtx.range_push("optimizer.step()")
         optimizer.step()
-        if args.prof >= 0: torch.cuda.nvtx.range_pop()
+        # if args.prof >= 0: torch.cuda.nvtx.range_pop()
 
         if i % args.print_freq == 0:
             # Every print_freq iterations, check the loss, accuracy, and speed.
@@ -584,6 +587,8 @@ def validate(val_loader, model, teacher, criterion):
 
 
 def save_checkpoint(args, state, is_best, filename='checkpoint.pth.tar'):
+    if not os.path.exists(args.save_dir):
+        os.makedirs(args.save_dir)
     filename = os.path.join(args.save_dir, filename)
     torch.save(state, filename)
     if is_best:
