@@ -103,7 +103,7 @@ parser.add_argument('--teacher', type=str, default='',
 parser.add_argument('--teacher-weight', type=str, default='torchvision',
                     help='teacher model weight path')
 parser.add_argument('--review-kd-loss-weight', type=float, default=1.0,
-                    help='feature konwledge distillation loss weight')
+                    help='feature knowledge distillation loss weight')
 
 cudnn.benchmark = True
 
