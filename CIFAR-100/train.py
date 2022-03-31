@@ -88,7 +88,7 @@ from model.reviewkd import build_review_kd, hcl
 
 
 test_id = args.dataset + '_' + args.model + '_' + args.teacher + '_' + args.suffix
-filename = 'logs/' + test_id + '.txt'
+filename = '../log/' + test_id + '.txt'
 logger = Logger(args=args, filename=filename)
 print(args)
 
