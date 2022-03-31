@@ -8,4 +8,5 @@
 #SBATCH --constraint=ubuntu18,highcpucount
 #SBATCH -p batch_72h
 
-python train.py --model resnet56 --suffix baseline1
+source activate KD
+python3 train.py --model resnet56 --suffix baseline1
