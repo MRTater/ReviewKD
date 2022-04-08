@@ -12,7 +12,7 @@ import math
 
 class IMBALANCECIFAR10(torchvision.datasets.CIFAR10):
     cls_num = 10
-    data_path = "/mnt/proj56/jqcui/Data/cifar10"
+    data_path = "/research/dept8/fyp21/lj2104/lyy/ReviewKD/Data/cifar10"
 
     def __init__(self, root=None, imb_type='exp', imb_factor=0.01, rand_number=0, train=True,
                  transform=None, target_transform=None,
@@ -104,7 +104,7 @@ class IMBALANCECIFAR100(IMBALANCECIFAR10):
         'md5': '7973b15100ade9c7d40fb424638fde48',
     }
     cls_num = 100
-    data_path = "/mnt/proj56/jqcui/Data/cifar100"
+    data_path = "/research/dept8/fyp21/lj2104/lyy/ReviewKD/Data/cifar100"
 
 
 class CIFAR10V2(object):
@@ -122,9 +122,9 @@ class CIFAR10V2(object):
             transforms.ToTensor(),
             normalize,
         ])
-        trainset = IMBALANCECIFAR10(root="/mnt/proj56/jqcui/Data/cifar10", train=True, transform=transform_train,
+        trainset = IMBALANCECIFAR10(root="/research/dept8/fyp21/lj2104/lyy/ReviewKD/Data/cifar10", train=True, transform=transform_train,
                                     download=False, imb_factor=imb_factor, class_balance=class_balance)
-        testset = datasets.CIFAR10(root='/mnt/proj56/jqcui/Data/cifar10', train=False, transform=transform_test,
+        testset = datasets.CIFAR10(root='/research/dept8/fyp21/lj2104/lyy/ReviewKD/Data/cifar10', train=False, transform=transform_test,
                                    download=False)
 
         self.train = torch.utils.data.DataLoader(
@@ -154,9 +154,9 @@ class CIFAR10V2_auto(object):
             transforms.ToTensor(),
             normalize,
         ])
-        trainset = IMBALANCECIFAR10(root="/mnt/proj56/jqcui/Data/cifar10", train=True, transform=transform_train,
+        trainset = IMBALANCECIFAR10(root="/research/dept8/fyp21/lj2104/lyy/ReviewKD/Data/cifar10", train=True, transform=transform_train,
                                     download=False, imb_factor=imb_factor, class_balance=class_balance)
-        testset = datasets.CIFAR10(root='/mnt/proj56/jqcui/Data/cifar10', train=False, transform=transform_test,
+        testset = datasets.CIFAR10(root='/research/dept8/fyp21/lj2104/lyy/ReviewKD/Data/cifar10', train=False, transform=transform_test,
                                    download=False)
 
         self.train = torch.utils.data.DataLoader(
@@ -185,9 +185,9 @@ class CIFAR100V2(object):
             transforms.ToTensor(),
             normalize,
         ])
-        trainset = IMBALANCECIFAR100(root='/mnt/proj56/jqcui/Data/cifar100', train=True, transform=transform_train,
+        trainset = IMBALANCECIFAR100(root='/research/dept8/fyp21/lj2104/lyy/ReviewKD/Data/cifar100', train=True, transform=transform_train,
                                      download=False, imb_factor=imb_factor, class_balance=class_balance)
-        testset = datasets.CIFAR100(root='/mnt/proj56/jqcui/Data/cifar100', train=False, transform=transform_test,
+        testset = datasets.CIFAR100(root='/research/dept8/fyp21/lj2104/lyy/ReviewKD/Data/cifar100', train=False, transform=transform_test,
                                     download=False)
 
         self.train = torch.utils.data.DataLoader(
@@ -217,9 +217,9 @@ class CIFAR100V2_auto(object):
             transforms.ToTensor(),
             normalize,
         ])
-        trainset = IMBALANCECIFAR100(root='/mnt/proj56/jqcui/Data/cifar100', train=True, transform=transform_train,
+        trainset = IMBALANCECIFAR100(root='/research/dept8/fyp21/lj2104/lyy/ReviewKD/Data/cifar100', train=True, transform=transform_train,
                                      download=False, imb_factor=imb_factor, class_balance=class_balance)
-        testset = datasets.CIFAR100(root='/mnt/proj56/jqcui/Data/cifar100', train=False, transform=transform_test,
+        testset = datasets.CIFAR100(root='/research/dept8/fyp21/lj2104/lyy/ReviewKD/Data/cifar100', train=False, transform=transform_test,
                                     download=False)
 
         self.train = torch.utils.data.DataLoader(
