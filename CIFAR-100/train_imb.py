@@ -62,7 +62,7 @@ parser.add_argument('--ce-loss-weight', type=float, default=1.0,
                     help='cross entropy loss weight')
 
 parser.add_argument('--imb_factor', default=0.01, type=float)
-parser.add_argument('-num_classes', default=100, type=int)
+parser.add_argument('--num_classes', default=100, type=int)
 
 args = parser.parse_args()
 assert torch.cuda.is_available()
@@ -107,25 +107,22 @@ test_transform = transforms.Compose([
     normalize])
 
 # dataset
-if args.dataset == 'cifar10':
-    num_classes = 10
-elif args.dataset == 'cifar100':
-    num_classes = 100
-data=getattr(dataset,args.dataset)(batch_size=args.batch_size, imb_factor=args.imb_factor)
+num_classes = 100
+data = getattr(dataset, args.dataset)(batch_size=args.batch_size, imb_factor=args.imb_factor)
 
 # teacher model
 if 'x4' in args.teacher:
-    teacher = build_resnetx4_backbone(depth=int(args.teacher[6:-2]), num_classes=num_classes)
+    teacher = build_resnetx4_backbone(depth=int(args.teacher[6:-2]), num_classes=args.num_classes)
 elif 'resnet' in args.teacher:
-    teacher = build_resnet_backbone(depth=int(args.teacher[6:]), num_classes=num_classes)
+    teacher = build_resnet_backbone(depth=int(args.teacher[6:]), num_classes=args.num_classes)
 elif 'ResNet50' in args.teacher:
-    teacher = ResNet50(num_classes=num_classes)
+    teacher = ResNet50(num_classes=args.num_classes)
 elif 'vgg' in args.teacher:
-    teacher = build_vgg_backbone(depth=int(args.teacher[3:]), num_classes=num_classes)
+    teacher = build_vgg_backbone(depth=int(args.teacher[3:]), num_classes=args.num_classes)
 elif 'mobile' in args.teacher:
-    teacher = mobile_half(num_classes=num_classes)
+    teacher = mobile_half(num_classes=args.num_classes)
 elif 'wrn' in args.teacher:
-    teacher = wrn(depth=int(args.teacher[4:6]), widen_factor=int(args.teacher[-1:]), num_classes=num_classes)
+    teacher = wrn(depth=int(args.teacher[4:6]), widen_factor=int(args.teacher[-1:]), num_classes=args.num_classes)
 elif args.teacher == '':
     teacher = None
 else:
