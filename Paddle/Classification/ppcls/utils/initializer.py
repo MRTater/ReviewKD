@@ -120,7 +120,7 @@ def _calculate_fan_in_and_fan_out(tensor, reverse=False):
 
     Args:
         tensor (Tensor): paddle.Tensor
-        reverse (bool: False): tensor data format order, False by default as [fout, fin, ...]. e.g. : conv.weight [cout, cin, kh, kw] is False; linear.weight [cin, cout] is True
+        reverse (bool: False): tensor datasets format order, False by default as [fout, fin, ...]. e.g. : conv.weight [cout, cin, kh, kw] is False; linear.weight [cin, cout] is True
 
     Return:
         Tuple[fan_in, fan_out]
@@ -151,7 +151,7 @@ def xavier_uniform_(tensor, gain=1., reverse=False):
     Args:
         tensor (paddle.Tensor): paddle Tensor
         gain (str): super parameter, 1. default.
-        reverse (bool):  reverse (bool: False): tensor data format order, False by default as [fout, fin, ...].
+        reverse (bool):  reverse (bool: False): tensor datasets format order, False by default as [fout, fin, ...].
     Return:
         tensor
     """
@@ -167,7 +167,7 @@ def xavier_normal_(tensor, gain=1., reverse=False):
     Args:
         tensor (paddle.Tensor): paddle Tensor
         gain (str): super parameter, 1. default.
-        reverse (bool):  reverse (bool: False): tensor data format order, False by default as [fout, fin, ...].
+        reverse (bool):  reverse (bool: False): tensor datasets format order, False by default as [fout, fin, ...].
     Return:
         tensor
     """
@@ -228,7 +228,7 @@ def kaiming_uniform_(tensor,
         tensor (paddle.Tensor): paddle Tensor
         mode (str): ['fan_in', 'fan_out'], 'fin_in' defalut
         nonlinearity (str): nonlinearity method name
-        reverse (bool):  reverse (bool: False): tensor data format order, False by default as [fout, fin, ...].
+        reverse (bool):  reverse (bool: False): tensor datasets format order, False by default as [fout, fin, ...].
     Return:
         tensor
     """
@@ -250,7 +250,7 @@ def kaiming_normal_(tensor,
         tensor (paddle.Tensor): paddle Tensor
         mode (str): ['fan_in', 'fan_out'], 'fin_in' defalut
         nonlinearity (str): nonlinearity method name
-        reverse (bool):  reverse (bool: False): tensor data format order, False by default as [fout, fin, ...].
+        reverse (bool):  reverse (bool: False): tensor datasets format order, False by default as [fout, fin, ...].
     Return:
         tensor
     """

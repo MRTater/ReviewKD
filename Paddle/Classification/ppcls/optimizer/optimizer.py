@@ -64,7 +64,7 @@ class Momentum(object):
 
     Args:
         learning_rate (float|Variable) - The learning rate used to update parameters.
-            Can be a float value or a Variable with one float value as data element.
+            Can be a float value or a Variable with one float value as datasets element.
         momentum (float) - Momentum factor.
         regularization (WeightDecayRegularizer, optional) - The strategy of regularization.
     """
@@ -96,7 +96,7 @@ class RMSProp(object):
 
     Args:
         learning_rate (float|Variable) - The learning rate used to update parameters.
-            Can be a float value or a Variable with one float value as data element.
+            Can be a float value or a Variable with one float value as datasets element.
         momentum (float) - Momentum factor.
         rho (float) - rho value in equation.
         epsilon (float) - avoid division by zero, default is 1e-6.

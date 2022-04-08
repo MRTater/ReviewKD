@@ -35,7 +35,7 @@ model_names = sorted(name for name in models.__dict__
                      and callable(models.__dict__[name]))
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
-parser.add_argument('data', metavar='DIR',
+parser.add_argument('datasets', metavar='DIR',
                     help='path to dataset')
 parser.add_argument('--arch', '-a', metavar='ARCH', default='resnet18',
                     #                    choices=model_names,
@@ -43,7 +43,7 @@ parser.add_argument('--arch', '-a', metavar='ARCH', default='resnet18',
                          ' | '.join(model_names) +
                          ' (default: resnet18)')
 parser.add_argument('-j', '--workers', default=32, type=int, metavar='N',
-                    help='number of data loading workers (default: 4)')
+                    help='number of datasets loading workers (default: 4)')
 parser.add_argument('--epochs', default=20, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
@@ -87,7 +87,7 @@ parser.add_argument(
     help="Use multi-processing distributed training to launch "
          "N processes per node, which has N GPUs. This is the "
          "fastest way to use PyTorch for either single node or "
-         "multi node data parallel training",
+         "multi node datasets parallel training",
 )
 
 parser.add_argument("--local_rank", default=0, type=int)
@@ -170,7 +170,7 @@ def main():
 
     if args.gpu is not None:
         warnings.warn('You have chosen a specific GPU. This will completely '
-                      'disable data parallelism.')
+                      'disable datasets parallelism.')
 
     if args.dist_url == "env://" and args.world_size == -1:
         args.world_size = int(os.environ["WORLD_SIZE"])
@@ -463,7 +463,7 @@ def train(train_loader, model, teacher, criterion, optimizer, epoch, scheduler):
         loss.backward()
 
         # for param in model.parameters():
-        #     print(param.data.double().sum().item(), param.grad.data.double().sum().item())
+        #     print(param.datasets.double().sum().item(), param.grad.datasets.double().sum().item())
 
         # if args.prof >= 0: torch.cuda.nvtx.range_push("optimizer.step()")
         optimizer.step()

@@ -60,13 +60,13 @@ def add_teacher_cfg(cfg):
     cfg.TEACHER.INPUT.MIN_SIZE_TEST = 800
     # Maximum size of the side of the image during testing
     cfg.TEACHER.INPUT.MAX_SIZE_TEST = 1333
-    # Mode for flipping images used in data augmentation during training
+    # Mode for flipping images used in datasets augmentation during training
     # choose one of ["horizontal, "vertical", "none"]
     cfg.TEACHER.INPUT.RANDOM_FLIP = "horizontal"
     
-    # `True` if cropping is used for data augmentation during training
+    # `True` if cropping is used for datasets augmentation during training
     cfg.TEACHER.INPUT.CROP = CN({"ENABLED": False})
-    # Cropping type. See documentation of `detectron2.data.transforms.RandomCrop` for explanation.
+    # Cropping type. See documentation of `detectron2.datasets.transforms.RandomCrop` for explanation.
     cfg.TEACHER.INPUT.CROP.TYPE = "relative_range"
     # Size of crop in range (0, 1] if CROP.TYPE is "relative" or "relative_range" and in number of
     # pixels if CROP.TYPE is "absolute"
@@ -108,7 +108,7 @@ def add_teacher_cfg(cfg):
     # DataLoader
     # -----------------------------------------------------------------------------
     cfg.TEACHER.DATALOADER = CN()
-    # Number of data loading threads
+    # Number of datasets loading threads
     cfg.TEACHER.DATALOADER.NUM_WORKERS = 4
     # If True, each batch should contain only images for which the aspect ratio
     # is compatible. This groups portrait images together, and landscape images
