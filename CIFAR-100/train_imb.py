@@ -62,7 +62,7 @@ parser.add_argument('--ce-loss-weight', type=float, default=1.0,
                     help='cross entropy loss weight')
 
 parser.add_argument('--imb_factor', default=0.01, type=float)
-parser.add_argument('-num_classes',default=100, type=int)
+parser.add_argument('-num_classes', default=100, type=int)
 
 args = parser.parse_args()
 assert torch.cuda.is_available()
