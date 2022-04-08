@@ -107,6 +107,10 @@ test_transform = transforms.Compose([
     normalize])
 
 # dataset
+if args.dataset == 'cifar10':
+    num_classes = 10
+elif args.dataset == 'cifar100':
+    num_classes = 100
 data=getattr(dataset,args.dataset)(batch_size=args.batch_size, imb_factor=args.imb_factor)
 
 # teacher model
