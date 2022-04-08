@@ -186,9 +186,9 @@ class CIFAR100V2(object):
             normalize,
         ])
         trainset = IMBALANCECIFAR100(root='/research/dept8/fyp21/lj2104/lyy/ReviewKD/Data/cifar100', train=True, transform=transform_train,
-                                     download=False, imb_factor=imb_factor, class_balance=class_balance)
+                                     download=True, imb_factor=imb_factor, class_balance=class_balance)
         testset = datasets.CIFAR100(root='/research/dept8/fyp21/lj2104/lyy/ReviewKD/Data/cifar100', train=False, transform=transform_test,
-                                    download=False)
+                                    download=True)
 
         self.train = torch.utils.data.DataLoader(
             trainset,
