@@ -9,4 +9,4 @@
 #SBATCH -p gpu_24h
 
 source activate KD
-python3 train_imb.py --model resnet20 --suffix baseline1 -dataset CIFAR100V2 --imb_factor 0.01
+python3 train_imb.py --model resnet20 --suffix baseline1 --dataset CIFAR100V2 --imb_factor 0.01
