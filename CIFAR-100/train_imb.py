@@ -69,6 +69,8 @@ assert torch.cuda.is_available()
 
 cudnn.deterministic = True
 cudnn.benchmark = False
+# cudnn.enabled = False
+
 if args.seed == 0:
     args.seed = np.random.randint(1000)
 torch.manual_seed(args.seed)
