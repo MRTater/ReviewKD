@@ -10,5 +10,5 @@
 
 source activate KD
 python3 train_imb.py --model resnet56 --teacher resnet56 \
- --teacher-weight checkpoints/CIFAR100V2_resnet56__baseline1_best_256.pt \
+ --teacher-weight checkpoints/CIFAR100V2_resnet56__baseline1_256_best.pt \
  --kd-loss-weight 0.6 --suffix reviewkd1 --dataset CIFAR100V2 --imb_factor 0.01 --batch_size 256
