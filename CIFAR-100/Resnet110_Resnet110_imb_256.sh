@@ -9,6 +9,6 @@
 #SBATCH -p batch_72h
 
 source activate KD
-python3 ../train_imb.py --model resnet110 --teacher resnet110 \
+python3 train_imb.py --model resnet110 --teacher resnet110 \
  --teacher-weight checkpoints/CIFAR100V2_resnet110__baseline1_256_best.pt \
   --kd-loss-weight 1.0 --suffix reviewkd1 --dataset CIFAR100V2 --imb_factor 0.01 --batch_size 256
