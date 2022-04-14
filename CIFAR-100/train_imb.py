@@ -178,7 +178,10 @@ criterion = nn.CrossEntropyLoss().cuda()
 kl_criterion = DistillKL(args.T)
 wd = args.wd
 lr = args.lr
-cnn_optimizer = torch.optim.SGD(trainable_parameters.parameters(), lr=args.lr,
+if "ensemble" in args.model:
+    cnn_optimizer = torch.optim.SGD(cnn.parameters(), lr=lr, momentum=0.9, weight_decay=wd)
+else:
+    cnn_optimizer = torch.optim.SGD(trainable_parameters.parameters(), lr=args.lr,
                                 momentum=0.9, nesterov=True, weight_decay=wd)
 
 # test
