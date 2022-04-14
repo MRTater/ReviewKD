@@ -184,6 +184,8 @@ else:
     cnn_optimizer = torch.optim.SGD(trainable_parameters.parameters(), lr=args.lr,
                                 momentum=0.9, nesterov=True, weight_decay=wd)
 
+
+
 # test
 def test(loader):
     cnn.eval()  # Change model to 'eval' mode (BN uses moving mean/var).
@@ -208,6 +210,10 @@ def test(loader):
 
 if args.test:
     cnn.load_state_dict(torch.load(args.resume))
+    print(test(data.test))
+    exit()
+
+if "ensemble" in args.model:
     print(test(data.test))
     exit()
 
