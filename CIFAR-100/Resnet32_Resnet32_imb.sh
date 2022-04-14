@@ -6,7 +6,7 @@
 #SBATCH --gres=gpu:4
 #SBATCH -c 40
 #SBATCH --constraint=ubuntu18,highcpucount
-#SBATCH -p gpu_24
+#SBATCH -p gpu_24h
 
 source activate KD
 python3 train_imb.py --model resnet32 --teacher resnet32 \
