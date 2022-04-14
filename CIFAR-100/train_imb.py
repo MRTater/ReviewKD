@@ -92,9 +92,8 @@ from model.wide_resnet import WideResNet
 from model.reviewkd import build_review_kd, hcl
 
 test_id = args.dataset + '_' + args.model + '_' + args.teacher + '_' + args.suffix
-learning_rate = args.lr
 if args.batch_size == 256:
-    learning_rate = 0.2
+    args.lr = 0.2
     test_id += '_256'
 filename = '../log/' + test_id + '.txt'
 logger = Logger(args=args, filename=filename)
