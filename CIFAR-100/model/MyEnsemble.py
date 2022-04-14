@@ -8,11 +8,14 @@ class MyEnsemble(nn.Module):
         super(MyEnsemble, self).__init__()
 
         with open(modelA, 'rb') as f:
-            self.modelA = torch.load(f)
+            self.modelA.load_state_dict(torch.load(f))
+            # modelA.eval()
         with open(modelB, 'rb') as f:
-            self.modelB = torch.load(f)
+            self.modelB.load_state_dict(torch.load(f))
+            # modelB.eval()
         with open(modelC, 'rb') as f:
-            self.modelC = torch.load(f)
+            self.modelC.load_state_dict(torch.load(f))
+            # modelC.eval()
 
     def forward(self, x):
         out1 = self.modelA(x)
