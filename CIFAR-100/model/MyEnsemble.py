@@ -11,16 +11,16 @@ class MyEnsemble(nn.Module):
 
         with open(modelA, 'rb') as f:
             self.modelA = build_resnet_backbone(depth=int(32), num_classes=100)
-            modelA.load_state_dict(torch.load(f))
-            modelA.eval()
+            self.modelA.load_state_dict(torch.load(f))
+            self.modelA.eval()
         with open(modelB, 'rb') as f:
             self.modelB = build_resnet_backbone(depth=int(32), num_classes=100)
-            modelB.load_state_dict(torch.load(f))
-            modelB.eval()
+            self.modelB.load_state_dict(torch.load(f))
+            self.modelB.eval()
         with open(modelC, 'rb') as f:
             self.modelC = build_resnet_backbone(depth=int(32), num_classes=100)
-            modelC.load_state_dict(torch.load(f))
-            modelC.eval()
+            self.modelC.load_state_dict(torch.load(f))
+            self.modelC.eval()
 
     def forward(self, x):
         out1 = self.modelA(x)
