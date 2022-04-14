@@ -64,6 +64,10 @@ parser.add_argument('--ce-loss-weight', type=float, default=1.0,
 parser.add_argument('--imb_factor', default=0.01, type=float)
 parser.add_argument('--num_classes', default=100, type=int)
 
+parser.add_argument('--ensemble1', default=None, help='ensemble model path')
+parser.add_argument('--ensemble2', default=None, help='ensemble model path')
+parser.add_argument('--ensemble3', default=None, help='ensemble model path')
+
 args = parser.parse_args()
 assert torch.cuda.is_available()
 
@@ -90,6 +94,8 @@ from model.shufflenetv2 import ShuffleV2
 from model.wide_resnet_cifar import wrn
 from model.wide_resnet import WideResNet
 from model.reviewkd import build_review_kd, hcl
+
+from model.MyEnsemble import ensemble
 
 test_id = args.dataset + '_' + args.model + '_' + args.teacher + '_' + args.suffix
 if args.batch_size == 256:
@@ -154,6 +160,8 @@ elif 'shufflev2' in args.model:
     cnn = ShuffleV2(num_classes=num_classes)
 elif 'wrn' in args.model:
     cnn = wrn(depth=int(args.model[4:6]), widen_factor=int(args.model[-1:]), num_classes=num_classes)
+elif 'ensemble' in args.model:
+    cnn = ensemble(modelA=args.ensemble1, modelB=args.ensemble2, modelC=args.ensemble3)
 elif args.model == 'wideresnet':
     cnn = WideResNet(depth=28, num_classes=num_classes, widen_factor=10,
                      dropRate=0.3)
@@ -172,7 +180,6 @@ wd = args.wd
 lr = args.lr
 cnn_optimizer = torch.optim.SGD(trainable_parameters.parameters(), lr=args.lr,
                                 momentum=0.9, nesterov=True, weight_decay=wd)
-
 
 # test
 def test(loader):
