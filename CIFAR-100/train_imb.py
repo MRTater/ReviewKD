@@ -214,7 +214,19 @@ if args.test:
     exit()
 
 if "ensemble" in args.model:
-    print(test(data.test))
+    correct = 0.
+    total = 0.
+    for images, labels in data.test:
+        images, labels = images.cuda(), labels.cuda()
+
+        with torch.no_grad():
+            pred = cnn(images)
+
+        total += labels.size(0)
+        correct += (pred == labels).sum().item()
+
+    val_acc = correct / total
+    print(val_acc)
     exit()
 
 # train
