@@ -9,6 +9,7 @@ class MyEnsemble(nn.Module):
 
     def __init__(self, modelA, modelB, modelC, KD_ensemble):
         super(MyEnsemble, self).__init__()
+        self.KD_ensemble = KD_ensemble
         if KD_ensemble is None:
             with open(modelA, 'rb') as f:
                 self.modelA = build_resnet_backbone(depth=int(32), num_classes=100)
@@ -37,11 +38,18 @@ class MyEnsemble(nn.Module):
                 self.modelC.eval()
 
     def forward(self, x):
-        out1 = self.modelA(x)
-        out2 = self.modelB(x)
-        out3 = self.modelC(x)
-        out = out1 + out2 + out3
-        return torch.argmax(out, dim=1)
+        if self.KD_ensemble is None:
+            out1 = self.modelA(x)
+            out2 = self.modelB(x)
+            out3 = self.modelC(x)
+            out = out1 + out2 + out3
+            return torch.argmax(out, dim=1)
+        else:
+            out1, logit1 = self.modelA(x)
+            out2, logit2 = self.modelB(x)
+            out3, logit2 = self.modelC(x)
+            out = out1 + out2 + out3
+            return torch.argmax(out, dim=1)
 
 def ensemble(**kwargs):
     """
