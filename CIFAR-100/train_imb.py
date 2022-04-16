@@ -222,7 +222,7 @@ if "ensemble" in args.model:
 
         with torch.no_grad():
             if args.KD_ensemble:
-                fs, pred = cnn(images)
+                pred = cnn(images)
             else:
                 pred = cnn(images)
 
