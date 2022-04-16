@@ -10,6 +10,7 @@
 
 source activate KD
 python3 train_imb.py --model ensemble --suffix baseline1 --dataset CIFAR100V2 --imb_factor 0.01 \
+ --KD_ensemble True \
  --ensemble1 ensemble/CIFAR100V2_resnet32_resnet32_reviewkd1_best_1.pt \
  --ensemble2 ensemble/CIFAR100V2_resnet32_resnet32_reviewkd1_best_2.pt \
  --ensemble3 ensemble/CIFAR100V2_resnet32_resnet32_reviewkd1_best_3.pt

@@ -64,6 +64,7 @@ parser.add_argument('--ce-loss-weight', type=float, default=1.0,
 parser.add_argument('--imb_factor', default=0.01, type=float)
 parser.add_argument('--num_classes', default=100, type=int)
 
+parser.add_argument('--KD_ensemble', default=None, help='KD ensemble')
 parser.add_argument('--ensemble1', default=None, help='ensemble model path')
 parser.add_argument('--ensemble2', default=None, help='ensemble model path')
 parser.add_argument('--ensemble3', default=None, help='ensemble model path')
@@ -161,7 +162,7 @@ elif 'shufflev2' in args.model:
 elif 'wrn' in args.model:
     cnn = wrn(depth=int(args.model[4:6]), widen_factor=int(args.model[-1:]), num_classes=num_classes)
 elif 'ensemble' in args.model:
-    cnn = ensemble(modelA=args.ensemble1, modelB=args.ensemble2, modelC=args.ensemble3)
+    cnn = ensemble(modelA=args.ensemble1, modelB=args.ensemble2, modelC=args.ensemble3, KD_ensemble=args.KD_ensemble)
 elif args.model == 'wideresnet':
     cnn = WideResNet(depth=28, num_classes=num_classes, widen_factor=10,
                      dropRate=0.3)
