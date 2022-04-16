@@ -45,9 +45,9 @@ class MyEnsemble(nn.Module):
             out = out1 + out2 + out3
             return torch.argmax(out, dim=1)
         else:
-            out1, logit1 = self.modelA(x)
-            out2, logit2 = self.modelB(x)
-            out3, logit2 = self.modelC(x)
+            results1, out1 = self.modelA(x)
+            results2, out2 = self.modelB(x)
+            results3, out3 = self.modelC(x)
             out = out1 + out2 + out3
             return torch.argmax(out, dim=1)
 

@@ -221,7 +221,10 @@ if "ensemble" in args.model:
         images, labels = images.cuda(), labels.cuda()
 
         with torch.no_grad():
-            pred = cnn(images)
+            if args.KD_ensemble:
+                fs, pred = cnn(images)
+            else:
+                pred = cnn(images)
 
         total += labels.size(0)
         correct += (pred == labels).sum().item()
