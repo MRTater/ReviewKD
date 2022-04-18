@@ -10,6 +10,6 @@
 
 source activate KD
 python3 train_imb.py --model ensemble --suffix baseline1 --dataset CIFAR100V2 --imb_factor 0.01 \
- --ensemble1 ensemble/CIFAR100V2_resnet32__baseline1_best_1.pt \
- --ensemble2 ensemble/CIFAR100V2_resnet32__baseline1_best_2.pt \
- --ensemble3 ensemble/CIFAR100V2_resnet32__baseline1_best_3.pt
+ --ensemble1 ensemble/CIFAR100V2_resnet32__baseline1_256_best_1.pt \
+ --ensemble2 ensemble/CIFAR100V2_resnet32__baseline1_256_best_2.pt \
+ --ensemble3 ensemble/CIFAR100V2_resnet32__baseline1_256_best_3.pt

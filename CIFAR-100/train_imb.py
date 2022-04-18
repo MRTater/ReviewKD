@@ -230,7 +230,7 @@ if "ensemble" in args.model:
         correct += (pred == labels).sum().item()
 
     val_acc = correct / total
-    print(val_acc)
+    print('ensemble acc %.2f' % (val_acc * 100))
     exit()
 
 # train
